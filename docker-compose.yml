@@ -1,0 +1,13 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: youtube-analytics
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "8400:8400"
+    volumes:
+      - ./youtube_analytics.db:/app/youtube_analytics.db

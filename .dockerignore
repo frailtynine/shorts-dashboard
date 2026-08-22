@@ -1,0 +1,13 @@
+.git
+.gitignore
+.pytest_cache
+.ruff_cache
+.venv
+__pycache__
+migrations/__pycache__
+migrations/versions/__pycache__
+*.pyc
+*.pyo
+*.pyd
+tests
+youtube_analytics.db

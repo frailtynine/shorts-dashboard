@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Дашборд YouTube Shorts</title>
+    <link
+      href="https://unpkg.com/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ request.url_for('static', path='css/dashboard.css') }}"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="hero">
+        <h1 class="h3 mb-2">Дашборд YouTube Shorts</h1>
+        <p class="subtitle">
+          Недельная аналитика тем, длительности и просмотров.
+          Дата отчета: {{ generated_at }}
+        </p>
+        <div class="hero-meta">
+          <span class="hero-chip">
+            Каналов в базе: {{ channel_options | length }}
+          </span>
+          <span class="hero-chip">
+            Шортсов в таблице: {{ shorts_table | length }}
+          </span>
+        </div>
+      </section>
+
+      <section class="controls">
+        <div class="control-group">
+          <label for="channelSelect">Канал</label>
+          <select id="channelSelect" onchange="onChannelChange()">
+            {% for ch in channel_options %}
+            <option
+              value="{{ ch.channel_id }}"
+              {% if ch.channel_id == selected_channel %}selected{% endif %}
+            >
+              {{ ch.channel_title }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="weekFilter">Период</label>
+          <select id="weekFilter" onchange="applyWeekFilter()">
+            <option value="all">Все недели</option>
+            {% for week in available_weeks %}
+            <option value="{{ week.key }}">{{ week.label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </section>
+
+      <section class="charts">
+        <article class="chart-card">
+          <h2 class="chart-title">Просмотры по неделям</h2>
+          <div class="chart-frame">
+            <canvas id="viewsChart"></canvas>
+          </div>
+        </article>
+        <article class="chart-card">
+          <h2 class="chart-title">Средняя длительность (сек)</h2>
+          <div class="chart-frame">
+            <canvas id="durationChart"></canvas>
+          </div>
+        </article>
+        <article class="chart-card">
+          <h2 class="chart-title">Темы (ср. просмотры за все время)</h2>
+          <div class="chart-frame">
+            <canvas id="themesChart"></canvas>
+          </div>
+        </article>
+      </section>
+
+      {% if weekly_stats %}
+      <section class="grid weekly-grid" id="weeklyGrid">
+        {% for week in weekly_stats %}
+        <article class="week-card" data-week-key="{{ week.week_start }}">
+          <h2 class="week-title h6">Неделя: {{ week.week_label }}</h2>
+
+          <div class="metrics">
+            <div class="metric">
+              <div class="label">Шортсов</div>
+              <div class="value">{{ week.total_shorts }}</div>
+            </div>
+            <div class="metric">
+              <div class="label">Просмотры</div>
+              <div class="value">{{ week.total_views | short_num }}</div>
+            </div>
+            <div class="metric">
+              <div class="label">Средняя длит. (сек)</div>
+              <div class="value">{{ week.avg_duration }}</div>
+            </div>
+            <div class="metric">
+              <div class="label">Средние просмотры</div>
+              <div class="value">{{ week.avg_views | short_num }}</div>
+            </div>
+          </div>
+
+          <ul class="themes">
+            <li class="themes-head">
+              <span>Тема</span>
+              <span class="num-col">Шт.</span>
+              <span class="num-col">Просм.</span>
+              <span class="num-col">Ср.</span>
+            </li>
+            {% for theme in week.themes %}
+            <li>
+              <span class="theme-name">{{ theme.name }}</span>
+              <span
+                class="theme-num"
+                title="Количество шортсов по теме"
+              >
+                {{ theme.count }}
+              </span>
+              <span
+                class="theme-num"
+                title="Суммарные просмотры по теме за неделю"
+              >
+                {{ theme.total_views | short_num }}
+              </span>
+              <span
+                class="theme-num avg"
+                title="ср. = суммарные просмотры / количество шортсов"
+              >
+                {{ theme.avg_views | short_num }}
+              </span>
+            </li>
+            {% endfor %}
+          </ul>
+        </article>
+        {% endfor %}
+      </section>
+      {% else %}
+      <div class="empty">
+        Пока нет данных в базе для отображения.
+      </div>
+      {% endif %}
+
+      <section class="table-card">
+        <h2 class="table-title h5">Все шортсы</h2>
+        <div class="table-wrap">
+          <table id="shortsTable">
+            <thead>
+              <tr>
+                <th>
+                  <button onclick="sortTable('published', 'date')">
+                    Дата
+                  </button>
+                </th>
+                <th>
+                  <button onclick="sortTable('title', 'text')">
+                    Заголовок
+                  </button>
+                </th>
+                <th>
+                  <button onclick="sortTable('theme', 'text')">Тема</button>
+                </th>
+                <th class="num">
+                  <button onclick="sortTable('duration', 'number')">
+                    Длительность
+                  </button>
+                </th>
+                <th class="num">
+                  <button onclick="sortTable('views', 'number')">
+                    Просмотры
+                  </button>
+                </th>
+                <th class="num">
+                  <button onclick="sortTable('likes', 'number')">Лайки</button>
+                </th>
+                <th class="num">
+                  <button onclick="sortTable('comments', 'number')">
+                    Комментарии
+                  </button>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in shorts_table %}
+              <tr data-week-key="{{ item.week_key }}">
+                <td data-sort="{{ item.published_sort }}">
+                  {{ item.published_label }}
+                </td>
+                <td data-sort="{{ item.title }}">
+                  <a
+                    class="video-link"
+                    href="https://www.youtube.com/watch?v={{ item.video_id }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {{ item.title }}
+                  </a>
+                </td>
+                <td data-sort="{{ item.theme_name }}">
+                  {{ item.theme_name }}
+                </td>
+                <td class="num" data-sort="{{ item.duration_seconds }}">
+                  {{ item.duration_seconds }}
+                </td>
+                <td class="num" data-sort="{{ item.view_count }}">
+                  {{ item.view_count | short_num }}
+                </td>
+                <td class="num" data-sort="{{ item.like_count }}">
+                  {{ item.like_count }}
+                </td>
+                <td class="num" data-sort="{{ item.comment_count }}">
+                  {{ item.comment_count }}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      window.DASHBOARD_DATA = {{ chart_data | tojson }};
+      window.SELECTED_CHANNEL = {{ selected_channel | tojson }};
+      window.DEFAULT_WEEK_KEY = {{ default_week_key | tojson }};
+    </script>
+    <script
+      src="{{ request.url_for('static', path='js/dashboard.js') }}"
+    ></script>
+  </body>
+  </html>
