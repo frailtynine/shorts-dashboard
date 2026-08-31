@@ -107,9 +107,10 @@ def test_get_channel_data_builds_expected_payload(
     payload = channel_overview_module.ChannelOverviewService().get_channel_data(
         "channel-123"
     )
-    assert set(payload) == {"channel_overview", "entries"}
+    assert set(payload) == {"channel_overview", "entries", "view_count"}
     assert payload["channel_overview"].channel_id == "channel-123"
     assert payload["channel_overview"].channel_title == "Test Channel"
+    assert payload["view_count"] == 44000
     assert payload["entries"][0].video_id == "short-1"
     assert payload["entries"][0].title == "First short"
     assert payload["entries"][1].video_id == "short-2"

@@ -39,11 +39,13 @@ class RetrievedShortCRUD:
     def list_latest_without_theme(
         self,
         limit: int,
+        channel_id: str,
     ) -> list[RetrievedShortSchema]:
         models = self.session.scalars(
             select(RetrievedShort)
             .options(joinedload(RetrievedShort.theme))
             .where(RetrievedShort.theme_id.is_(None))
+            .where(RetrievedShort.channel_id == channel_id)
             .order_by(RetrievedShort.fetched_at.asc())
             .limit(limit)
         ).all()
@@ -52,12 +54,14 @@ class RetrievedShortCRUD:
     def list_latest_described_without_theme(
         self,
         limit: int,
+        channel_id: str,
     ) -> list[RetrievedShortSchema]:
         models = self.session.scalars(
             select(RetrievedShort)
             .options(joinedload(RetrievedShort.theme))
             .where(RetrievedShort.theme_id.is_(None))
             .where(RetrievedShort.description != "")
+            .where(RetrievedShort.channel_id == channel_id)
             .order_by(RetrievedShort.fetched_at.desc())
             .limit(limit)
         ).all()
