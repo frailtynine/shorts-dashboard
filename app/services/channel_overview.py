@@ -180,19 +180,24 @@ class ChannelOverviewService:
 
     def get_latest_shorts_without_theme(
         self,
+        channel_id: str,
         limit: int,
     ) -> list[RetrievedShortSchema]:
         with session_scope() as session:
             shorts_crud = RetrievedShortCRUD(session)
-            return shorts_crud.list_latest_without_theme(limit)
+            return shorts_crud.list_latest_without_theme(limit, channel_id)
 
     def get_latest_described_shorts_without_theme(
         self,
+        channel_id: str,
         limit: int,
     ) -> list[RetrievedShortSchema]:
         with session_scope() as session:
             shorts_crud = RetrievedShortCRUD(session)
-            return shorts_crud.list_latest_described_without_theme(limit)
+            return shorts_crud.list_latest_described_without_theme(
+                limit,
+                channel_id,
+            )
 
     def get_theme_names(self) -> list[str]:
         with session_scope() as session:

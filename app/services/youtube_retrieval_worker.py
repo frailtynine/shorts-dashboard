@@ -46,54 +46,76 @@ def run_youtube_retrieval() -> None:
 
 def run_shorts_ai_processing() -> None:
     settings = get_settings()
+    channels = settings.sync_channels
     service = ChannelOverviewService()
 
+    if not channels:
+        logger.info("shorts ai processing skipped: no sync channels configured")
+        return
+
     try:
-        shorts = service.get_latest_shorts_without_theme(
-            settings.sync_theme_scan_limit
-        )
-
-        if not shorts:
+        for channel_id in channels:
             logger.info(
-                "shorts ai processing skipped: no shorts without themes"
-            )
-            return
-
-        logger.info(
-            "shorts ai processing started: shorts=%s",
-            len(shorts),
-        )
-
-        full_data, failed_video_ids = service.retrieve_full_short_data(shorts)
-        service.save_full_short_data(full_data)
-        service.mark_shorts_as_not_processed(failed_video_ids)
-
-        shorts = service.get_latest_described_shorts_without_theme(
-            settings.sync_theme_scan_limit
-        )
-        theme_names = service.get_theme_names()
-
-        for offset in range(0, len(shorts), 10):
-            batch = shorts[offset:offset + 10]
-            logger.info(
-                "shorts ai processing batch started: offset=%s size=%s",
-                offset,
-                len(batch),
-            )
-            batch_result = service.choose_themes_for_batch(
-                batch,
-                list(theme_names),
+                "shorts ai processing channel started: channel_id=%s",
+                channel_id,
             )
 
-            for video_id, theme_name in batch_result:
-                service.save_short_theme(video_id, theme_name)
-                if theme_name not in theme_names:
-                    theme_names.append(theme_name)
+            shorts = service.get_latest_shorts_without_theme(
+                channel_id,
+                settings.sync_theme_scan_limit,
+            )
+
+            if not shorts:
+                logger.info(
+                    "shorts ai processing skipped channel: no shorts without themes channel_id=%s",
+                    channel_id,
+                )
+                continue
 
             logger.info(
-                "shorts ai processing batch finished: offset=%s size=%s",
-                offset,
-                len(batch),
+                "shorts ai processing started: channel_id=%s shorts=%s",
+                channel_id,
+                len(shorts),
+            )
+
+            full_data, failed_video_ids = service.retrieve_full_short_data(shorts)
+            service.save_full_short_data(full_data)
+            service.mark_shorts_as_not_processed(failed_video_ids)
+
+            shorts = service.get_latest_described_shorts_without_theme(
+                channel_id,
+                settings.sync_theme_scan_limit,
+            )
+            theme_names = service.get_theme_names()
+
+            for offset in range(0, len(shorts), 10):
+                batch = shorts[offset:offset + 10]
+                logger.info(
+                    "shorts ai processing batch started: channel_id=%s offset=%s size=%s",
+                    channel_id,
+                    offset,
+                    len(batch),
+                )
+                batch_result = service.choose_themes_for_batch(
+                    batch,
+                    list(theme_names),
+                )
+
+                for video_id, theme_name in batch_result:
+                    service.save_short_theme(video_id, theme_name)
+                    if theme_name not in theme_names:
+                        theme_names.append(theme_name)
+
+                logger.info(
+                    "shorts ai processing batch finished: channel_id=%s offset=%s size=%s",
+                    channel_id,
+                    offset,
+                    len(batch),
+                )
+
+            logger.info(
+                "shorts ai processing channel finished: channel_id=%s",
+                channel_id,
             )
 
         logger.info("shorts ai processing cycle completed")
