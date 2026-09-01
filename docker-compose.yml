@@ -10,4 +10,4 @@ services:
     ports:
       - "8400:8400"
     volumes:
-      - ./youtube_analytics.db:/app/youtube_analytics.db
+      - ./data:/data

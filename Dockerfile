@@ -27,4 +27,4 @@ RUN uv sync --locked --no-dev
 
 EXPOSE 8400
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8400"]
+CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8400"]
