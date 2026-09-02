@@ -11,7 +11,7 @@ from app.db.models import RetrievedShort, Theme
 from app.db.session import get_db_session
 
 
-router = APIRouter(prefix="/dashboard", tags=["dashboard"])
+router = APIRouter(tags=["dashboard"])
 templates = Jinja2Templates(directory="app/templates")
 
 
@@ -57,7 +57,7 @@ RU_MONTHS = {
 }
 
 
-@router.get("", response_class=HTMLResponse)
+@router.get("/", response_class=HTMLResponse)
 def dashboard_page(
     request: Request,
     channel: str | None = Query(default=None),

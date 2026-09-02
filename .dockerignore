@@ -11,3 +11,4 @@ migrations/versions/__pycache__
 *.pyd
 tests
 youtube_analytics.db
+data/
