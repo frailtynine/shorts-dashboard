@@ -1,0 +1,192 @@
+{
+  "kind": "youtube#videoListResponse",
+  "etag": "pd19eCSUF_JTBJNs9i0hcnya_Ro",
+  "items": [
+    {
+      "kind": "youtube#video",
+      "etag": "vSSk84ejLUep4VRvfV60dcP0vxI",
+      "id": "JxhSF-Zz5zs",
+      "snippet": {
+        "publishedAt": "2026-08-20T12:01:14Z",
+        "channelId": "UCBzDAjLfvBUBVMMP6-K-y0w",
+        "title": "Блэкаут в Москве сломал интернет по всей России",
+        "description": "Отключение электричества в Гагаринском районе Москвы вызвало масштабный сбой в работе распределительного центра ММТС-9. В результате интернет пропадал в нескольких регионах России #новости #Москва #интернет",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/JxhSF-Zz5zs/default.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/JxhSF-Zz5zs/mqdefault.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/JxhSF-Zz5zs/hqdefault.jpg",
+            "width": 480,
+            "height": 360
+          },
+          "standard": {
+            "url": "https://i.ytimg.com/vi/JxhSF-Zz5zs/sddefault.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "maxres": {
+            "url": "https://i.ytimg.com/vi/JxhSF-Zz5zs/maxresdefault.jpg",
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "channelTitle": "Ходорковский LIVE",
+        "tags": [
+          "новости",
+          "блэкаут",
+          "москва",
+          "интернет"
+        ],
+        "categoryId": "25",
+        "liveBroadcastContent": "none",
+        "defaultLanguage": "ru",
+        "localized": {
+          "title": "Блэкаут в Москве сломал интернет по всей России",
+          "description": "Отключение электричества в Гагаринском районе Москвы вызвало масштабный сбой в работе распределительного центра ММТС-9. В результате интернет пропадал в нескольких регионах России #новости #Москва #интернет"
+        },
+        "defaultAudioLanguage": "ru"
+      },
+      "contentDetails": {
+        "duration": "PT39S",
+        "dimension": "2d",
+        "definition": "hd",
+        "caption": "false",
+        "licensedContent": true,
+        "contentRating": {},
+        "projection": "rectangular"
+      },
+      "statistics": {
+        "viewCount": "115859",
+        "likeCount": "2855",
+        "favoriteCount": "0",
+        "commentCount": "183"
+      }
+    },
+    {
+      "kind": "youtube#video",
+      "etag": "lzT5kYD_9Y6-7OfVFJYYHKgfWc4",
+      "id": "JeAUkJ6QsMg",
+      "snippet": {
+        "publishedAt": "2026-08-20T07:01:10Z",
+        "channelId": "UCBzDAjLfvBUBVMMP6-K-y0w",
+        "title": "Офицер РФ отказался посылать солдат на минное поле",
+        "description": "Лейтенант армии России Владимир Ивкин столкнулся с преследованием командиров из-за того, что не стал посылать подчиненных на верную гибель на войне в Украине #Россия #война #армия",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/JeAUkJ6QsMg/default.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/JeAUkJ6QsMg/mqdefault.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/JeAUkJ6QsMg/hqdefault.jpg",
+            "width": 480,
+            "height": 360
+          },
+          "standard": {
+            "url": "https://i.ytimg.com/vi/JeAUkJ6QsMg/sddefault.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "maxres": {
+            "url": "https://i.ytimg.com/vi/JeAUkJ6QsMg/maxresdefault.jpg",
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "channelTitle": "Ходорковский LIVE",
+        "categoryId": "25",
+        "liveBroadcastContent": "none",
+        "defaultLanguage": "ru"
+      },
+      "contentDetails": {
+        "duration": "PT49S",
+        "dimension": "2d",
+        "definition": "hd",
+        "caption": "false",
+        "licensedContent": true,
+        "contentRating": {},
+        "projection": "rectangular"
+      },
+      "statistics": {
+        "viewCount": "1512404",
+        "likeCount": "41263",
+        "favoriteCount": "0",
+        "commentCount": "4031"
+      }
+    },
+    {
+      "kind": "youtube#video",
+      "etag": "OGyQmIC_IQUse2Ib3lAuZ6lr8pY",
+      "id": "AV9DGJpnjPw",
+      "snippet": {
+        "publishedAt": "2026-08-17T19:34:00Z",
+        "channelId": "UCBzDAjLfvBUBVMMP6-K-y0w",
+        "title": "11 лет тюрьмы противнику Путина: Лев Шлосберг услышал свой приговор",
+        "description": "Заместитель председателя партии «Яблоко» Лев Шлосберг получил 11 лет 1 месяц лишения свободы за «фейки о российской армии». Это один из самых суровых подобных приговоров #новости #Шлосберг #приговор",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/AV9DGJpnjPw/default.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/AV9DGJpnjPw/mqdefault.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/AV9DGJpnjPw/hqdefault.jpg",
+            "width": 480,
+            "height": 360
+          },
+          "standard": {
+            "url": "https://i.ytimg.com/vi/AV9DGJpnjPw/sddefault.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "maxres": {
+            "url": "https://i.ytimg.com/vi/AV9DGJpnjPw/maxresdefault.jpg",
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "channelTitle": "Ходорковский LIVE",
+        "categoryId": "25",
+        "liveBroadcastContent": "none",
+        "defaultLanguage": "ru"
+      },
+      "contentDetails": {
+        "duration": "PT40S",
+        "dimension": "2d",
+        "definition": "hd",
+        "caption": "false",
+        "licensedContent": true,
+        "contentRating": {},
+        "projection": "rectangular"
+      },
+      "statistics": {
+        "viewCount": "476012",
+        "likeCount": "10479",
+        "favoriteCount": "0",
+        "commentCount": "768"
+      }
+    }
+  ],
+  "pageInfo": {
+    "totalResults": 3,
+    "resultsPerPage": 3
+  }
+}

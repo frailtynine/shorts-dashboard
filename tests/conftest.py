@@ -40,7 +40,7 @@ def client(db_session: Session) -> Generator[TestClient, None, None]:
 
     @lru_cache
     def fake_settings() -> Settings:
-        return Settings(sync_worker_enabled=False)
+        return Settings()
 
     original_settings = get_settings
     import app.main as main_module

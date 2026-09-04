@@ -25,7 +25,30 @@ Default local database URL:
 - Start with `make docker-up`
 - App listens on `http://127.0.0.1:8400`
 - Docker Compose mounts `./data` to `/data`
-- The container runs `alembic upgrade head` automatically before starting `uvicorn`
+- The container runs `alembic upgrade head` before starting `uvicorn`
+- Background jobs are started in FastAPI lifespan via `APScheduler`
+
+## Sync Workers
+
+- YouTube retrieval job:
+  - iterates channel Shorts tabs with `yt-dlp`
+  - updates channel-level data and discovered Shorts
+  - uses `YOUTUBE_RETRIEVAL_INTERVAL_SECONDS`
+  - sleeps `YOUTUBE_RETRIEVAL_CHANNEL_PAUSE_SECONDS` between channels
+- AI processing job:
+  - runs every `AI_PROCESSING_INTERVAL_SECONDS`
+  - fetches full short metadata through YouTube Data API
+  - keeps the existing AI theme processing flow
+
+Required environment values:
+
+- `YOUTUBE_API_KEY`
+- `GOOGLE_GENAI_API_KEY`
+- `SYNC_CHANNELS`
+- `YOUTUBE_RETRIEVAL_INTERVAL_SECONDS`
+- `YOUTUBE_RETRIEVAL_CHANNEL_PAUSE_SECONDS`
+- `AI_PROCESSING_INTERVAL_SECONDS`
+- `SYNC_THEME_SCAN_LIMIT`
 
 ## Dashboard
 

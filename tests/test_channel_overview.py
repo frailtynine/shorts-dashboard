@@ -1,10 +1,15 @@
 import pytest
 from sqlalchemy.orm import Session
 from contextlib import contextmanager
+import httpx
+import json
+from pathlib import Path
 
 import app.services.channel_overview as channel_overview_module
+import app.services.youtube_api_processing as youtube_api_processing_module
 from app.db.crud import ChannelOverviewCRUD, RetrievedShortCRUD
 from app.schemas.models import ChannelOverviewCreate, RetrievedShortCreate
+from app.services.utils import parse_iso8601_duration
 
 
 class FakeYoutubeDL:
@@ -46,6 +51,17 @@ def install_fake_ytdlp(
         fake_youtube_dl,
     )
     return state
+
+
+class FakeHTTPResponse:
+    def __init__(self, payload: dict) -> None:
+        self.payload = payload
+
+    def raise_for_status(self) -> None:
+        return None
+
+    def json(self) -> dict:
+        return self.payload
 
 
 def build_channel_overview(channel_id: str) -> ChannelOverviewCreate:
@@ -283,3 +299,83 @@ def test_save_shorts_from_channel_overview_updates_existing_short_in_db(
     assert saved.view_count == 999
     assert saved.like_count == 44
     assert saved.comment_count == 5
+
+
+def test_retrieve_full_short_data_uses_youtube_data_api(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[dict] = []
+    fixture_path = Path(__file__).parent / "fixtures" / "youtube_video_list_response.json"
+    fixture_payload = json.loads(fixture_path.read_text(encoding="utf-8"))
+
+    def fake_get(url: str, params: dict, timeout: float) -> FakeHTTPResponse:
+        calls.append({"url": url, "params": params, "timeout": timeout})
+        return FakeHTTPResponse(fixture_payload)
+
+    monkeypatch.setattr(youtube_api_processing_module.httpx, "get", fake_get)
+    monkeypatch.setattr(
+        youtube_api_processing_module,
+        "get_settings",
+        lambda: type("Settings", (), {"youtube_api_key": "test-key"})(),
+    )
+
+    service = youtube_api_processing_module.YoutubeAPIProcessingService()
+    result, failed = service.retrieve_full_short_data(
+        [build_short("JxhSF-Zz5zs", "channel-123")]
+    )
+
+    assert failed == []
+    assert len(result) == 1
+    video_id, payload = result[0]
+    assert video_id == "JxhSF-Zz5zs"
+    assert payload.title == "Блэкаут в Москве сломал интернет по всей России"
+    assert payload.description.startswith("Отключение электричества")
+    assert payload.channel_title == "Ходорковский LIVE"
+    assert payload.duration_seconds == 39
+    assert payload.view_count == 115859
+    assert payload.like_count == 2855
+    assert payload.comment_count == 183
+    assert payload.thumbnail_url == (
+        "https://i.ytimg.com/vi/JxhSF-Zz5zs/maxresdefault.jpg"
+    )
+    assert payload.webpage_url == "https://www.youtube.com/shorts/JxhSF-Zz5zs"
+    assert calls[0]["params"]["id"] == "JxhSF-Zz5zs"
+
+
+def test_retrieve_full_short_data_marks_missing_items_failed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        youtube_api_processing_module.httpx,
+        "get",
+        lambda url, params, timeout: FakeHTTPResponse({"items": []}),
+    )
+    monkeypatch.setattr(
+        youtube_api_processing_module,
+        "get_settings",
+        lambda: type("Settings", (), {"youtube_api_key": "test-key"})(),
+    )
+
+    service = youtube_api_processing_module.YoutubeAPIProcessingService()
+    result, failed = service.retrieve_full_short_data(
+        [build_short("short-404", "channel-123")]
+    )
+
+    assert result == []
+    assert failed == ["short-404"]
+
+
+def test_retrieve_full_short_data_requires_api_key() -> None:
+    youtube_api_processing_module.get_settings = lambda: type(
+        "Settings", (), {"youtube_api_key": ""}
+    )()
+    service = youtube_api_processing_module.YoutubeAPIProcessingService()
+
+    with pytest.raises(ValueError, match="YOUTUBE_API_KEY"):
+        service.retrieve_full_short_data([build_short("short-1", "channel-123")])
+
+
+def test_parse_iso8601_duration_handles_short_values() -> None:
+    assert parse_iso8601_duration("PT59S") == 59
+    assert parse_iso8601_duration("PT1M2S") == 62
+    assert parse_iso8601_duration("PT2H3M4S") == 7384
