@@ -34,7 +34,10 @@ class RetrievedShortCRUD:
             .where(RetrievedShort.channel_id == channel_id)
             .order_by(RetrievedShort.published_at.desc())
         ).all()
-        return [RetrievedShortSchema.model_validate(model) for model in models]
+        return [
+            RetrievedShortSchema.model_validate(model)
+            for model in models
+        ]
 
     def list_latest_without_theme(
         self,
@@ -49,7 +52,10 @@ class RetrievedShortCRUD:
             .order_by(RetrievedShort.fetched_at.asc())
             .limit(limit)
         ).all()
-        return [RetrievedShortSchema.model_validate(model) for model in models]
+        return [
+            RetrievedShortSchema.model_validate(model)
+            for model in models
+        ]
 
     def list_latest_described_without_theme(
         self,
@@ -65,7 +71,10 @@ class RetrievedShortCRUD:
             .order_by(RetrievedShort.fetched_at.desc())
             .limit(limit)
         ).all()
-        return [RetrievedShortSchema.model_validate(model) for model in models]
+        return [
+            RetrievedShortSchema.model_validate(model)
+            for model in models
+        ]
 
     def create(self, payload: RetrievedShortCreate) -> RetrievedShortSchema:
         model = RetrievedShort(
@@ -97,8 +106,9 @@ class RetrievedShortCRUD:
         return RetrievedShortSchema.model_validate(model)
 
     def update(
-        self, video_id: str,
-        payload: RetrievedShortUpdate
+        self,
+        video_id: str,
+        payload: RetrievedShortUpdate,
     ) -> RetrievedShortSchema | None:
         model = self.session.scalar(
             select(RetrievedShort)
@@ -145,7 +155,9 @@ class RetrievedShortCRUD:
             if payload.like_count is not None:
                 model.add_like_point(payload.like_count, payload.fetched_at)
             if payload.comment_count is not None:
-                model.add_comment_point(payload.comment_count, payload.fetched_at)
+                model.add_comment_point(
+                    payload.comment_count, payload.fetched_at
+                )
 
         self.session.flush()
         self.session.refresh(model)

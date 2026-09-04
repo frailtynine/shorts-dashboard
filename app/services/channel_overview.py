@@ -93,62 +93,6 @@ class ChannelOverviewService:
                     shorts_crud.create(retrieved_short)
                 all_shorts_ids.append(retrieved_short.video_id)
 
-    def retrieve_full_short_data(
-        self,
-        shorts: list[RetrievedShortSchema],
-    ) -> tuple[list[tuple[str, RetrievedShortUpdate]], list[str]]:
-        ydl_opts = {
-            'skip_download': True,
-            'js_runtimes': {
-                'node': {}
-            }
-        }
-        result: list[tuple[str, RetrievedShortUpdate]] = []
-        failed_video_ids: list[str] = []
-        with yt_dlp.YoutubeDL(ydl_opts) as ytd:
-            for short in shorts:
-                try:
-                    info = ytd.extract_info(
-                        f"https://youtube.com/shorts/{short.video_id}",
-                        download=False,
-                    )
-                except Exception:
-                    failed_video_ids.append(short.video_id)
-                    continue
-
-                if not info:
-                    failed_video_ids.append(short.video_id)
-                    continue
-
-                published_at = None
-                timestamp = info.get("timestamp")
-                if timestamp is not None:
-                    published_at = datetime.fromtimestamp(
-                        timestamp,
-                        tz=timezone.utc,
-                    )
-
-                result.append(
-                    (
-                        short.video_id,
-                        RetrievedShortUpdate(
-                            channel_id=short.channel_id,
-                            channel_title=info.get("channel", ""),
-                            title=info.get("title", ""),
-                            description=info.get("description", ""),
-                            duration_seconds=int(info.get("duration", 0)),
-                            published_at=published_at,
-                            view_count=int(info.get("view_count", 0)),
-                            like_count=int(info.get("like_count", 0)),
-                            comment_count=int(info.get("comment_count", 0)),
-                            thumbnail_url=info.get("thumbnail", ""),
-                            webpage_url=info.get("webpage_url", ""),
-                            fetched_at=datetime.now(timezone.utc),
-                        ),
-                    )
-                )
-        return result, failed_video_ids
-
     def save_full_short_data(
         self,
         payload_list: list[tuple[str, RetrievedShortUpdate]],

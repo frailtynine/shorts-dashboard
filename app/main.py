@@ -5,11 +5,10 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from app.api.router import api_router
-from app.services.youtube_retrieval_worker import YoutubeRetrievalWorker
+from app.services.worker import worker
 
 
 logger = logging.getLogger(__name__)
-retrieval_worker = YoutubeRetrievalWorker()
 
 
 def configure_logging() -> None:
@@ -28,11 +27,11 @@ def configure_logging() -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     _ = app
-    retrieval_worker.start()
+    worker.start()
     try:
         yield
     finally:
-        retrieval_worker.stop()
+        worker.stop()
 
 
 def create_app() -> FastAPI:
