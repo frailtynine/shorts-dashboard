@@ -44,7 +44,10 @@ def client(db_session: Session) -> Generator[TestClient, None, None]:
 
     original_settings = get_settings
     import app.main as main_module
+
     main_module.get_settings = fake_settings
+    main_module.worker.start = lambda: None
+    main_module.worker.stop = lambda: None
 
     app = create_app()
 

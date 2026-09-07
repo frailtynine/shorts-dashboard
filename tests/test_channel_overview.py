@@ -1,12 +1,16 @@
-import pytest
-from sqlalchemy.orm import Session
-from contextlib import contextmanager
-import httpx
 import json
+from contextlib import contextmanager
+from datetime import datetime
+from functools import lru_cache
 from pathlib import Path
 
+import pytest
+from sqlalchemy.orm import Session
+
+import app.api.routers.dashboard as dashboard_module
 import app.services.channel_overview as channel_overview_module
 import app.services.youtube_api_processing as youtube_api_processing_module
+from app.core.config import Settings
 from app.db.crud import ChannelOverviewCRUD, RetrievedShortCRUD
 from app.schemas.models import ChannelOverviewCreate, RetrievedShortCreate
 from app.services.utils import parse_iso8601_duration
@@ -379,3 +383,112 @@ def test_parse_iso8601_duration_handles_short_values() -> None:
     assert parse_iso8601_duration("PT59S") == 59
     assert parse_iso8601_duration("PT1M2S") == 62
     assert parse_iso8601_duration("PT2H3M4S") == 7384
+
+
+def test_dashboard_defaults_to_first_configured_channel_latest_week(
+    client,
+    db_session: Session,
+) -> None:
+    first_short = RetrievedShortCreate(
+        video_id="first-short",
+        channel_id="first-channel",
+        channel_title="First Channel",
+        title="Latest short",
+        view_count=100,
+        like_count=10,
+        comment_count=1,
+        duration_seconds=35,
+        published_at=datetime.fromisoformat("2026-09-03T10:00:00+00:00"),
+    )
+    second_short = RetrievedShortCreate(
+        video_id="second-short",
+        channel_id="second-channel",
+        channel_title="Second Channel",
+        title="Other short",
+        view_count=200,
+        like_count=20,
+        comment_count=2,
+        duration_seconds=40,
+        published_at=datetime.fromisoformat("2026-09-10T10:00:00+00:00"),
+    )
+    RetrievedShortCRUD(db_session).create(first_short)
+    RetrievedShortCRUD(db_session).create(second_short)
+    db_session.commit()
+
+    dashboard_module.get_settings = lru_cache(
+        lambda: Settings(
+            sync_channels=["first-channel", "second-channel"],
+        )
+    )
+
+    response = client.get("/")
+
+    assert response.status_code == 200
+    body = response.text
+    assert "Latest short" in body
+    assert "Other short" not in body
+    assert 'window.SELECTED_CHANNEL = "first-channel"' in body
+    assert 'window.SELECTED_WEEK = "2026-09-06"' in body
+
+
+def test_dashboard_filters_by_channel_and_week(
+    client,
+    db_session: Session,
+) -> None:
+    RetrievedShortCRUD(db_session).create(
+        RetrievedShortCreate(
+            video_id="week-one",
+            channel_id="first-channel",
+            channel_title="First Channel",
+            title="Week one short",
+            view_count=100,
+            like_count=10,
+            comment_count=1,
+            duration_seconds=35,
+            published_at=datetime.fromisoformat("2026-09-01T10:00:00+00:00"),
+        )
+    )
+    RetrievedShortCRUD(db_session).create(
+        RetrievedShortCreate(
+            video_id="week-two",
+            channel_id="first-channel",
+            channel_title="First Channel",
+            title="Week two short",
+            view_count=300,
+            like_count=30,
+            comment_count=3,
+            duration_seconds=45,
+            published_at=datetime.fromisoformat("2026-09-10T10:00:00+00:00"),
+        )
+    )
+    RetrievedShortCRUD(db_session).create(
+        RetrievedShortCreate(
+            video_id="other-channel",
+            channel_id="second-channel",
+            channel_title="Second Channel",
+            title="Other channel short",
+            view_count=500,
+            like_count=50,
+            comment_count=5,
+            duration_seconds=55,
+            published_at=datetime.fromisoformat("2026-09-10T10:00:00+00:00"),
+        )
+    )
+    db_session.commit()
+
+    dashboard_module.get_settings = lru_cache(
+        lambda: Settings(sync_channels=["first-channel", "second-channel"])
+    )
+
+    response = client.get(
+        "/",
+        params={"channel": "first-channel", "week": "2026-09-13"},
+    )
+
+    assert response.status_code == 200
+    body = response.text
+    assert "Week two short" in body
+    assert "Week one short" not in body
+    assert "Other channel short" not in body
+    assert 'window.SELECTED_CHANNEL = "first-channel"' in body
+    assert 'window.SELECTED_WEEK = "2026-09-13"' in body

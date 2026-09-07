@@ -27,6 +27,12 @@
             Каналов в базе: {{ channel_options | length }}
           </span>
           <span class="hero-chip">
+            Канал: {{ selected_channel or "не выбран" }}
+          </span>
+          <span class="hero-chip">
+            Неделя: {{ selected_week_label or "нет данных" }}
+          </span>
+          <span class="hero-chip">
             Шортсов в таблице: {{ shorts_table | length }}
           </span>
         </div>
@@ -49,10 +55,18 @@
 
         <div class="control-group">
           <label for="weekFilter">Период</label>
-          <select id="weekFilter" onchange="applyWeekFilter()">
-            <option value="all">Все недели</option>
+          <select
+            id="weekFilter"
+            onchange="onWeekChange()"
+            {% if not available_weeks %}disabled{% endif %}
+          >
             {% for week in available_weeks %}
-            <option value="{{ week.key }}">{{ week.label }}</option>
+            <option
+              value="{{ week.key }}"
+              {% if week.key == selected_week %}selected{% endif %}
+            >
+              {{ week.label }}
+            </option>
             {% endfor %}
           </select>
         </div>
@@ -72,7 +86,7 @@
           </div>
         </article>
         <article class="chart-card">
-          <h2 class="chart-title">Темы (ср. просмотры за все время)</h2>
+          <h2 class="chart-title">Темы (ср. просмотры за неделю)</h2>
           <div class="chart-frame">
             <canvas id="themesChart"></canvas>
           </div>
@@ -82,7 +96,7 @@
       {% if weekly_stats %}
       <section class="grid weekly-grid" id="weeklyGrid">
         {% for week in weekly_stats %}
-        <article class="week-card" data-week-key="{{ week.week_start }}">
+        <article class="week-card">
           <h2 class="week-title h6">Неделя: {{ week.week_label }}</h2>
 
           <div class="metrics">
@@ -145,7 +159,7 @@
       {% endif %}
 
       <section class="table-card">
-        <h2 class="table-title h5">Все шортсы</h2>
+        <h2 class="table-title h5">Шортсы за выбранную неделю</h2>
         <div class="table-wrap">
           <table id="shortsTable">
             <thead>
@@ -185,7 +199,7 @@
             </thead>
             <tbody>
               {% for item in shorts_table %}
-              <tr data-week-key="{{ item.week_key }}">
+              <tr>
                 <td data-sort="{{ item.published_sort }}">
                   {{ item.published_label }}
                 </td>
@@ -225,7 +239,7 @@
     <script>
       window.DASHBOARD_DATA = {{ chart_data | tojson }};
       window.SELECTED_CHANNEL = {{ selected_channel | tojson }};
-      window.DEFAULT_WEEK_KEY = {{ default_week_key | tojson }};
+      window.SELECTED_WEEK = {{ selected_week | tojson }};
     </script>
     <script
       src="{{ request.url_for('static', path='js/dashboard.js') }}"
