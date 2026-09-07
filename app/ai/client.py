@@ -43,6 +43,11 @@ class AIProcessor:
             return "Разное"
 
         themes_text = "\n".join(f"- {name}" for name in themes)
+        content_text = f"Title: {title}\n"
+        trimmed_description = description.strip()[:500]
+        if trimmed_description:
+            content_text += f"Description: {trimmed_description}\n"
+
         prompt = (
             "Определи тему короткого видео YouTube. "
             "Темы трактуй как теги рубрик канала, чтобы было понятно, "
@@ -59,8 +64,7 @@ class AIProcessor:
             "В большинстве случаев тема из одного слова — плохое решение."
             "Если похожая тема уже есть в списке, используй именно ее "
             "без перефразирования.\n\n"
-            f"Title: {title}\n"
-            f"Description: {description}\n\n"
+            f"{content_text}\n"
             "Существующие темы:\n"
             f"{themes_text if themes_text else '- (пусто)'}"
         )
