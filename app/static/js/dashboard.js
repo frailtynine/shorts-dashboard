@@ -1,6 +1,4 @@
 const data = window.DASHBOARD_DATA;
-const selectedChannel = window.SELECTED_CHANNEL;
-const defaultWeekKey = window.DEFAULT_WEEK_KEY;
 const isMobile = window.matchMedia("(max-width: 680px)").matches;
 
 function compactWeekLabel(label) {
@@ -153,28 +151,6 @@ new Chart(document.getElementById("themesChart"), {
   },
 });
 
-function applyWeekFilter() {
-  const selected = document.getElementById("weekFilter").value;
-  const weeklyGrid = document.getElementById("weeklyGrid");
-  const showAll = selected === "all";
-
-  weeklyGrid.classList.toggle("is-hidden", showAll);
-
-  document.querySelectorAll(".week-card").forEach((card) => {
-    const weekKey = card.dataset.weekKey;
-    const visible = !showAll && weekKey === selected;
-    card.classList.toggle("is-hidden", !visible);
-  });
-
-  document.querySelectorAll("#shortsTable tbody tr").forEach((row) => {
-    const weekKey = row.dataset.weekKey;
-    const visible = showAll || weekKey === selected;
-    row.classList.toggle("is-hidden", !visible);
-  });
-}
-
-window.applyWeekFilter = applyWeekFilter;
-
 function onChannelChange() {
   const selected = document.getElementById("channelSelect").value;
   if (!selected) {
@@ -182,10 +158,30 @@ function onChannelChange() {
   }
   const url = new URL(window.location.href);
   url.searchParams.set("channel", selected);
+  url.searchParams.delete("week");
   window.location.href = url.toString();
 }
 
 window.onChannelChange = onChannelChange;
+
+function onWeekChange() {
+  const selectedChannel = document.getElementById("channelSelect").value;
+  const selectedWeek = document.getElementById("weekFilter").value;
+  const url = new URL(window.location.href);
+
+  if (selectedChannel) {
+    url.searchParams.set("channel", selectedChannel);
+  }
+  if (selectedWeek) {
+    url.searchParams.set("week", selectedWeek);
+  } else {
+    url.searchParams.delete("week");
+  }
+
+  window.location.href = url.toString();
+}
+
+window.onWeekChange = onWeekChange;
 
 const sortState = {
   published: true,
@@ -235,14 +231,8 @@ function sortTable(column, type) {
       : String(bVal).localeCompare(String(aVal), "ru");
   });
 
-  rows.forEach((row) => tbody.appendChild(row));
-  sortState[column] = !asc;
+rows.forEach((row) => tbody.appendChild(row));
+sortState[column] = !asc;
 }
 
 window.sortTable = sortTable;
-
-if (defaultWeekKey && defaultWeekKey !== "all") {
-  const weekFilter = document.getElementById("weekFilter");
-  weekFilter.value = defaultWeekKey;
-}
-applyWeekFilter();
