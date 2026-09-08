@@ -492,3 +492,5 @@ def test_dashboard_filters_by_channel_and_week(
     assert "Other channel short" not in body
     assert 'window.SELECTED_CHANNEL = "first-channel"' in body
     assert 'window.SELECTED_WEEK = "2026-09-13"' in body
+    assert "31 августа 2026 - 6 сентября 2026" in body
+    assert '"weekly_views": [100, 300]' in body

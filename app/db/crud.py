@@ -66,7 +66,6 @@ class RetrievedShortCRUD:
             select(RetrievedShort)
             .options(joinedload(RetrievedShort.theme))
             .where(RetrievedShort.theme_id.is_(None))
-            .where(RetrievedShort.description != "")
             .where(RetrievedShort.channel_id == channel_id)
             .order_by(RetrievedShort.fetched_at.desc())
             .limit(limit)

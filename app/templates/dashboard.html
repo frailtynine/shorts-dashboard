@@ -72,26 +72,29 @@
         </div>
       </section>
 
-      <section class="charts">
-        <article class="chart-card">
-          <h2 class="chart-title">Просмотры по неделям</h2>
-          <div class="chart-frame">
-            <canvas id="viewsChart"></canvas>
-          </div>
-        </article>
-        <article class="chart-card">
-          <h2 class="chart-title">Средняя длительность (сек)</h2>
-          <div class="chart-frame">
-            <canvas id="durationChart"></canvas>
-          </div>
-        </article>
-        <article class="chart-card">
-          <h2 class="chart-title">Темы (ср. просмотры за неделю)</h2>
-          <div class="chart-frame">
-            <canvas id="themesChart"></canvas>
-          </div>
-        </article>
-      </section>
+      <details class="overview-panel">
+        <summary>Обзор канала</summary>
+        <section class="charts">
+          <article class="chart-card">
+            <h2 class="chart-title">Просмотры по неделям</h2>
+            <div class="chart-frame">
+              <canvas id="viewsChart"></canvas>
+            </div>
+          </article>
+          <article class="chart-card">
+            <h2 class="chart-title">Средняя длительность (сек)</h2>
+            <div class="chart-frame">
+              <canvas id="durationChart"></canvas>
+            </div>
+          </article>
+          <article class="chart-card">
+            <h2 class="chart-title">Темы (ср. просмотры по каналу)</h2>
+            <div class="chart-frame">
+              <canvas id="themesChart"></canvas>
+            </div>
+          </article>
+        </section>
+      </details>
 
       {% if weekly_stats %}
       <section class="grid weekly-grid" id="weeklyGrid">
@@ -200,10 +203,10 @@
             <tbody>
               {% for item in shorts_table %}
               <tr>
-                <td data-sort="{{ item.published_sort }}">
+                <td class="cell-date" data-sort="{{ item.published_sort }}">
                   {{ item.published_label }}
                 </td>
-                <td data-sort="{{ item.title }}">
+                <td class="cell-title" data-sort="{{ item.title }}">
                   <a
                     class="video-link"
                     href="https://www.youtube.com/watch?v={{ item.video_id }}"
@@ -213,19 +216,30 @@
                     {{ item.title }}
                   </a>
                 </td>
-                <td data-sort="{{ item.theme_name }}">
+                <td class="cell-theme" data-sort="{{ item.theme_name }}">
                   {{ item.theme_name }}
                 </td>
-                <td class="num" data-sort="{{ item.duration_seconds }}">
+                <td
+                  class="num cell-duration"
+                  data-sort="{{ item.duration_seconds }}"
+                >
                   {{ item.duration_seconds }}
                 </td>
-                <td class="num" data-sort="{{ item.view_count }}">
+                <td class="num cell-views" data-sort="{{ item.view_count }}">
                   {{ item.view_count | short_num }}
                 </td>
-                <td class="num" data-sort="{{ item.like_count }}">
+                <td
+                  class="num cell-likes"
+                  data-sort="{{ item.like_count }}"
+                  aria-label="Лайки"
+                >
                   {{ item.like_count }}
                 </td>
-                <td class="num" data-sort="{{ item.comment_count }}">
+                <td
+                  class="num cell-comments"
+                  data-sort="{{ item.comment_count }}"
+                  aria-label="Комментарии"
+                >
                   {{ item.comment_count }}
                 </td>
               </tr>
