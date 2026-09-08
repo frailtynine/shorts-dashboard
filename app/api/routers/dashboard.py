@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, time, timedelta
+from datetime import UTC, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, Request
@@ -13,8 +13,10 @@ from app.api.routers.utils import (
     build_chart_data,
     build_shorts_table,
     build_weekly_stats,
+    filter_shorts_by_week,
     format_date_ru,
     format_short_num,
+    get_week_label,
     parse_week,
     resolve_selected_channel,
     resolve_selected_week,
@@ -58,35 +60,9 @@ def dashboard_page(
     available_weeks: list[dict[str, str]] = []
     selected_week = None
     selected_week_label = ""
-    shorts: list[dict[str, object]] = []
+    channel_shorts: list[dict[str, object]] = []
 
     if selected_channel:
-        published_values = db.scalars(
-            select(RetrievedShort.published_at)
-            .outerjoin(Theme, Theme.id == RetrievedShort.theme_id)
-            .where(RetrievedShort.channel_id == selected_channel)
-            .where((Theme.name.is_(None)) | (Theme.name != "Не обработано"))
-            .order_by(RetrievedShort.published_at.desc())
-        ).all()
-        available_weeks = build_available_weeks(published_values)
-        selected_week = resolve_selected_week(week, available_weeks)
-
-    selected_week_date = parse_week(selected_week)
-    if selected_week_date is not None and selected_channel is not None:
-        selected_week_label = next(
-            (
-                item["label"]
-                for item in available_weeks
-                if item["key"] == selected_week
-            ),
-            "",
-        )
-        week_start = selected_week_date - timedelta(days=6)
-        week_start_at = datetime.combine(week_start, time.min)
-        week_end_at = datetime.combine(
-            selected_week_date + timedelta(days=1),
-            time.min,
-        )
         raw_rows = db.execute(
             select(
                 RetrievedShort.video_id,
@@ -101,22 +77,33 @@ def dashboard_page(
                 Theme.name.label("theme_name"),
             )
             .outerjoin(Theme, Theme.id == RetrievedShort.theme_id)
-            .where((Theme.name.is_(None)) | (Theme.name != "Не обработано"))
             .where(RetrievedShort.channel_id == selected_channel)
-            .where(RetrievedShort.published_at >= week_start_at)
-            .where(RetrievedShort.published_at < week_end_at)
+            .where((Theme.name.is_(None)) | (Theme.name != "Не обработано"))
             .order_by(RetrievedShort.published_at.desc())
         ).all()
-        shorts = serialize_dashboard_rows(raw_rows)
+        channel_shorts = serialize_dashboard_rows(raw_rows)
+        available_weeks = build_available_weeks(
+            [item["published_at"] for item in channel_shorts]
+        )
+        selected_week = resolve_selected_week(week, available_weeks)
 
-    weekly_stats = build_weekly_stats(shorts)
-    chart_data = build_chart_data(weekly_stats)
-    shorts_table = build_shorts_table(shorts)
+    selected_week_date = parse_week(selected_week)
+    if selected_week_date is not None:
+        selected_week_label = get_week_label(selected_week, available_weeks)
+
+    channel_weekly_stats = build_weekly_stats(channel_shorts)
+    selected_week_shorts = filter_shorts_by_week(
+        channel_shorts,
+        selected_week_date,
+    )
+    selected_week_stats = build_weekly_stats(selected_week_shorts)
+    chart_data = build_chart_data(channel_weekly_stats)
+    shorts_table = build_shorts_table(selected_week_shorts)
 
     context = {
         "request": request,
         "generated_at": format_date_ru(datetime.now(UTC).date()),
-        "weekly_stats": weekly_stats,
+        "weekly_stats": selected_week_stats,
         "available_weeks": available_weeks,
         "channel_options": channel_options,
         "selected_channel": selected_channel or "",

@@ -145,7 +145,9 @@ def resolve_selected_week(
     return None
 
 
-def serialize_dashboard_rows(rows: Iterable[object]) -> list[dict[str, object]]:
+def serialize_dashboard_rows(
+    rows: Iterable[object],
+) -> list[dict[str, object]]:
     """Convert SQLAlchemy row objects into dashboard dictionaries."""
     return [
         {
@@ -212,7 +214,9 @@ def build_weekly_stats(
         themes[theme_name]["total_views"] += views
 
     weekly_stats: list[dict[str, object]] = []
-    for _, value in sorted(weekly.items(), key=lambda item: item[0], reverse=True):
+    for _, value in sorted(
+        weekly.items(), key=lambda item: item[0], reverse=True
+    ):
         durations = value.pop("durations")
         views = value.pop("views")
         week_end = parse_week(str(value["week_end"]))
@@ -246,6 +250,40 @@ def build_weekly_stats(
     return weekly_stats
 
 
+def filter_shorts_by_week(
+    shorts: list[dict[str, object]],
+    week_end: date | None,
+) -> list[dict[str, object]]:
+    """Return only shorts that belong to the selected week."""
+    if week_end is None:
+        return []
+
+    week_start = get_week_start_date(week_end)
+    filtered: list[dict[str, object]] = []
+    for item in shorts:
+        published_at = item["published_at"]
+        if not isinstance(published_at, datetime):
+            continue
+        published_date = published_at.date()
+        if week_start <= published_date <= week_end:
+            filtered.append(item)
+    return filtered
+
+
+def get_week_label(
+    week_key: str | None,
+    available_weeks: list[dict[str, str]],
+) -> str:
+    """Return the display label for the selected week key."""
+    if not week_key:
+        return ""
+
+    return next(
+        (item["label"] for item in available_weeks if item["key"] == week_key),
+        "",
+    )
+
+
 def build_chart_data(weekly_stats: list[dict[str, object]]) -> dict[str, list]:
     """Build chart.js payloads from the already filtered weekly stats."""
     chart_weeks = list(reversed(weekly_stats))
@@ -263,7 +301,9 @@ def build_chart_data(weekly_stats: list[dict[str, object]]) -> dict[str, list]:
     }
 
 
-def build_shorts_table(shorts: list[dict[str, object]]) -> list[dict[str, object]]:
+def build_shorts_table(
+    shorts: list[dict[str, object]]
+) -> list[dict[str, object]]:
     """Build sorted table rows for the currently selected payload."""
     shorts_table: list[dict[str, object]] = []
     sorted_pool = sorted(

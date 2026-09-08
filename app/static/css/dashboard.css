@@ -78,15 +78,15 @@ body {
 }
 
 .charts {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 12px;
-  margin-bottom: 14px;
 }
 
 .chart-card,
 .week-card,
 .table-card,
+.overview-panel,
 .empty {
   border: 1px solid var(--line);
   border-radius: 14px;
@@ -97,6 +97,40 @@ body {
 .week-card,
 .table-card {
   padding: 12px;
+}
+
+.overview-panel {
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+
+.overview-panel summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 12px;
+  font-weight: 700;
+}
+
+.overview-panel summary::-webkit-details-marker {
+  display: none;
+}
+
+.overview-panel summary::after {
+  content: "+";
+  float: right;
+  color: var(--muted);
+}
+
+.overview-panel[open] summary::after {
+  content: "-";
+}
+
+.overview-panel .weekly-grid {
+  padding: 0 12px 12px;
+}
+
+.overview-panel .charts {
+  padding: 0 12px 12px;
 }
 
 .chart-title,
@@ -120,6 +154,10 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 12px;
+}
+
+.weekly-grid {
+  margin-bottom: 18px;
 }
 
 .week-card.is-hidden,
@@ -285,10 +323,6 @@ tbody tr:hover {
     min-width: 0;
   }
 
-  .charts {
-    grid-template-columns: 1fr;
-  }
-
   .grid {
     grid-template-columns: 1fr;
   }
@@ -349,36 +383,169 @@ tbody tr:hover {
   tbody tr {
     border: 1px solid #e5e7eb;
     border-radius: 12px;
-    padding: 8px;
-    margin-bottom: 10px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
     background: #fff;
   }
 
   td {
     border: 0;
-    padding: 6px 0;
+    padding: 3px 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
+    gap: 8px;
   }
 
   td::before {
     color: #6b7280;
-    font-size: 12px;
+    font-size: 11px;
     white-space: nowrap;
   }
 
-  tbody td:nth-child(1)::before { content: "Дата"; }
+  tbody td:nth-child(1)::before { content: ""; }
   tbody td:nth-child(2)::before { content: "Заголовок"; }
   tbody td:nth-child(3)::before { content: "Тема"; }
-  tbody td:nth-child(4)::before { content: "Длительность"; }
+  tbody td:nth-child(4)::before { content: ""; }
   tbody td:nth-child(5)::before { content: "Просмотры"; }
-  tbody td:nth-child(6)::before { content: "Лайки"; }
-  tbody td:nth-child(7)::before { content: "Комментарии"; }
+  tbody td:nth-child(6)::before { content: ""; }
+  tbody td:nth-child(7)::before { content: ""; }
+
+  .cell-title,
+  .cell-date,
+  .cell-views {
+    display: inline-flex;
+    width: auto;
+  }
+
+  .cell-title {
+    padding-right: 10px;
+    min-width: 0;
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .cell-date,
+  .cell-views {
+    min-width: 0;
+    font-size: 12px;
+    color: #64748b;
+  }
+
+  .cell-date {
+    grid-column: 1;
+    grid-row: 2;
+    justify-content: flex-start;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  .cell-views {
+    grid-column: 2 / -1;
+    grid-row: 2;
+    min-width: 72px;
+    justify-content: flex-end;
+    margin-left: auto;
+    font-weight: 700;
+    color: #0c4a6e;
+  }
+
+  .cell-date,
+  .cell-theme,
+  .cell-duration,
+  .cell-likes,
+  .cell-comments {
+    font-size: 12px;
+  }
+
+  tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto auto;
+    column-gap: 8px;
+    row-gap: 3px;
+    align-items: center;
+  }
+
+  .cell-date,
+  .cell-theme,
+  .cell-duration,
+  .cell-likes,
+  .cell-comments {
+    display: inline-flex;
+    width: auto;
+    min-width: 0;
+  }
+
+  .cell-theme {
+    grid-column: 1;
+    grid-row: 3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #64748b;
+  }
+
+  .cell-duration {
+    grid-column: 2;
+    grid-row: 3;
+    justify-self: end;
+  }
+
+  .cell-likes {
+    grid-column: 3;
+    grid-row: 3;
+    justify-self: end;
+  }
+
+  .cell-comments {
+    grid-column: 4;
+    grid-row: 3;
+    justify-self: end;
+  }
+
+  tbody td.cell-date::before,
+  tbody td.cell-views::before,
+  tbody td.cell-likes::before,
+  tbody td.cell-comments::before {
+    font-size: 13px;
+    color: #64748b;
+  }
+
+  tbody td.cell-date::before {
+    content: "🗓️";
+  }
+
+  tbody td.cell-views::before {
+    content: "👁️";
+  }
+
+  tbody td.cell-likes::before {
+    content: "❤️";
+  }
+
+  tbody td.cell-comments::before {
+    content: "💬";
+  }
+
+  tbody td.cell-duration::before {
+    content: "⏱️";
+    font-size: 12px;
+    color: #64748b;
+  }
+
+  .cell-title::before,
+  .cell-theme::before {
+    display: none;
+  }
 
   .video-link {
-    text-align: right;
-    max-width: 65%;
+    text-align: left;
+    max-width: none;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .cell-date {
+    color: #64748b;
   }
 }

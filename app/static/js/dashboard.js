@@ -16,9 +16,38 @@ function compactWeekLabel(label) {
   return `${day} ${monthWord.slice(0, 3)}.`;
 }
 
-const weekLabels = isMobile
-  ? data.labels.map(compactWeekLabel)
-  : data.labels;
+function numericWeekLabel(label) {
+  const parts = String(label).split(" - ");
+  const last = parts[parts.length - 1]?.trim() || label;
+  const bits = last.split(" ");
+  if (bits.length < 3) {
+    return label;
+  }
+
+  const day = bits[0].padStart(2, "0");
+  const monthMap = {
+    января: "01",
+    февраля: "02",
+    марта: "03",
+    апреля: "04",
+    мая: "05",
+    июня: "06",
+    июля: "07",
+    августа: "08",
+    сентября: "09",
+    октября: "10",
+    ноября: "11",
+    декабря: "12",
+  };
+  const month = monthMap[bits[1].toLowerCase()];
+  if (!month) {
+    return label;
+  }
+
+  return `${day}.${month}`;
+}
+
+const weekLabels = data.labels.map(numericWeekLabel);
 const chartAnimation = isMobile ? false : { duration: 220 };
 
 function pieTopThemes(input, limit = 6) {
@@ -68,7 +97,7 @@ new Chart(document.getElementById("viewsChart"), {
     scales: {
       x: {
         ticks: {
-          maxRotation: isMobile ? 0 : 40,
+          maxRotation: 0,
           minRotation: isMobile ? 0 : 0,
           autoSkip: true,
           maxTicksLimit: isMobile ? 5 : 9,
@@ -104,7 +133,7 @@ new Chart(document.getElementById("durationChart"), {
     scales: {
       x: {
         ticks: {
-          maxRotation: isMobile ? 0 : 40,
+          maxRotation: 0,
           minRotation: isMobile ? 0 : 0,
           autoSkip: true,
           maxTicksLimit: isMobile ? 5 : 9,
